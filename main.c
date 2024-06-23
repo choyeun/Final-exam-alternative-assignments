@@ -235,6 +235,8 @@ void SearchAndModifyStudent() {
     char searchID[10];
     char searchName[10];
     int found = 0;
+    int foundIndex[MAX_STUDENTS];
+    int foundCount = 0;
 
     strcpy(fname1, "c:/Temp/성적데이터.txt");
 
@@ -264,38 +266,61 @@ void SearchAndModifyStudent() {
     // 학번 또는 이름으로 학생 데이터 검색
     for (int i = 0; i < CNT; i++) {
         if (strcmp(students[i].sid, searchID) == 0 || strcmp(students[i].name, searchID) == 0) {
-            printf("\n 학생을 찾았습니다: \n");
-            printf(" 학번: %s \n 이름: %s \n 국어: %d \n 영어: %d \n 수학: %d \n 총점: %d \n 평균: %d \n 등급: %c \n",
-                students[i].sid, students[i].name, students[i].score1, students[i].score2, students[i].score3, students[i].total, students[i].average, students[i].grade);
-            found = 1;
-
-            // 수정 또는 삭제 선택
-            printf("\n 1. 수정  2. 삭제  0. 취소 >> ");
-            N = getch();
-
-            if (N == '1') {
-                // 데이터 수정
-                printf("\n 새로운 이름: "); scanf("%9s", students[i].name);
-                printf(" 새로운 국어 점수: "); scanf("%d", &students[i].score1);
-                printf(" 새로운 영어 점수: "); scanf("%d", &students[i].score2);
-                printf(" 새로운 수학 점수: "); scanf("%d", &students[i].score3);
-                CalculateTotalAverage(&students[i]);
-                printf("\n 수정되었습니다.\n");
-            }
-            else if (N == '2') {
-                // 데이터 삭제
-                for (int j = i; j < CNT - 1; j++) {
-                    students[j] = students[j + 1];
-                }
-                CNT--;
-                printf("\n 삭제되었습니다.\n");
-            }
-            break;
+            foundIndex[foundCount] = i;
+            foundCount++;
         }
     }
 
-    if (!found) {
+    if (foundCount == 0) {
         printf("\n 학생을 찾을 수 없습니다.\n");
+    }
+    else if (foundCount == 1) {
+        found = 1;
+    }
+    else {
+        printf("\n 동명이인이 있습니다. 해당 학생을 선택하세요.\n");
+        for (int i = 0; i < foundCount; i++) {
+            printf(" %d. 학번: %s, 이름: %s, 국어: %d, 영어: %d, 수학: %d, 총점: %d, 평균: %d, 등급: %c\n",
+                i + 1, students[foundIndex[i]].sid, students[foundIndex[i]].name, students[foundIndex[i]].score1, students[foundIndex[i]].score2, students[foundIndex[i]].score3, students[foundIndex[i]].total, students[foundIndex[i]].average, students[foundIndex[i]].grade);
+        }
+        int choice;
+        printf(" 선택: ");
+        scanf("%d", &choice);
+        if (choice < 1 || choice > foundCount) {
+            printf("\n 잘못된 선택입니다.\n");
+            return;
+        }
+        foundIndex[0] = foundIndex[choice - 1];
+        found = 1;
+    }
+
+    if (found) {
+        int i = foundIndex[0];
+        printf("\n 학생을 찾았습니다: \n");
+        printf(" 학번: %s \n 이름: %s \n 국어: %d \n 영어: %d \n 수학: %d \n 총점: %d \n 평균: %d \n 등급: %c \n",
+            students[i].sid, students[i].name, students[i].score1, students[i].score2, students[i].score3, students[i].total, students[i].average, students[i].grade);
+
+        // 수정 또는 삭제 선택
+        printf("\n 1. 수정  2. 삭제  0. 취소 >> ");
+        N = getch();
+
+        if (N == '1') {
+            // 데이터 수정
+            printf("\n 새로운 이름: "); scanf("%9s", students[i].name);
+            printf(" 새로운 국어 점수: "); scanf("%d", &students[i].score1);
+            printf(" 새로운 영어 점수: "); scanf("%d", &students[i].score2);
+            printf(" 새로운 수학 점수: "); scanf("%d", &students[i].score3);
+            CalculateTotalAverage(&students[i]);
+            printf("\n 수정되었습니다.\n");
+        }
+        else if (N == '2') {
+            // 데이터 삭제
+            for (int j = i; j < CNT - 1; j++) {
+                students[j] = students[j + 1];
+            }
+            CNT--;
+            printf("\n 삭제되었습니다.\n");
+        }
     }
 
     // 수정된 데이터를 파일에 저장
