@@ -18,6 +18,7 @@ int EditData();
 int SaveReport0();
 int SaveReport1();
 int SaveReport2();
+int SaveReport3();
 int SaveCSV();
 int SaveHTML();
 void ClearTempFolder();
@@ -36,12 +37,13 @@ int main(void) {
         printf("\n\t   1. 새로운 성적 데이터 입력받아 파일에 저장하기 ");
         printf("\n\t   2. 파일에 저장된 성적 데이터 화면에 표시하기 ");
         printf("\n\t   3. 파일에 저장된 성적 데이터를 이용한 성적 집계표 파일 만들기 ");
-        printf("\n\t   4. 성적집계표-1 출력 ");
-        printf("\n\t   5. 성적집계표-2 출력 ");
-        printf("\n\t   6. 개인별 성적 데이터 관리 ");
-        printf("\n\t   8. 성적데이터를 Excel File(CSV) 로 출력 ");
-        printf("\n\t   9. 성적데이터를 Web Page(HTML) 로 출력 ");
-        printf("\n\t   0. 작업끝 ");
+        printf("\n\t   4. 성적집계표 성적순 출력 ");
+        printf("\n\t   5. 성적집계표 이름순 출력 ");
+        printf("\n\t   6. 성적집계표 학번순 출력 ");
+        printf("\n\t   7. 성적데이터를 Excel 파일(CSV)로 출력 ");
+        printf("\n\t   8. 성적데이터를 Web Page(HTML)로 출력 ");
+        printf("\n\t   9. 개인별 성적 데이터 관리 ");
+        printf("\n\t   0. 작업 끝 ");
         printf("\n\t ------------------------<< 번호를 선택하시오 >>");
         N = getch();
 
@@ -52,9 +54,10 @@ int main(void) {
         case  '3':  SaveReport0();   break;
         case  '4':  SaveReport1();   break;
         case  '5':  SaveReport2();   break;
-        case  '6':  EditData();  break;
-        case  '8':  SaveCSV();   break;
-        case  '9':  SaveHTML();  break;
+        case  '6':  SaveReport3();   break;
+        case  '7':  SaveCSV();   break;
+        case  '8':  SaveHTML();  break;
+        case  '9':  EditData();  break;
         }
         printf("\n\t -------------------------------------<< 확인 >>");
         N = getch();
@@ -172,15 +175,7 @@ int EditData() {
     return 0;
 }
 
-int SaveReport1() {
-    return 0;
-}
-
-int SaveReport2() {
-    return 0;
-}
-
-// 파일에 있는 성적 데이터를 합계 평균 처리 후 파일로 출력
+// 성적 집계표-기본 출력
 int SaveReport0() {
     strcpy(fname1, "c:/Temp/성적데이터.txt");
 
@@ -192,7 +187,7 @@ int SaveReport0() {
         printf("\n(!) 입력파일 : \"%s\" 을 열었습니다.\n", fname1);
     }
 
-    strcpy(fname2, "c:/Temp/성적집계표-1.txt");
+    strcpy(fname2, "c:/Temp/성적집계표-기본.txt");
 
     if ((fp2 = fopen(fname2, "w")) == NULL) {
         printf("(!) 출력파일 : \"%s\" 을 만들 수 없습니다.\n", fname2);
@@ -202,7 +197,7 @@ int SaveReport0() {
         printf("\n(!) 출력파일 : \"%s\" 을 만들었습니다.\n", fname2);
     }
 
-    fprintf(fp2, "\n\t 성적집계표-1");
+    fprintf(fp2, "\n\t 성적집계표-기본");
     fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====");
     fprintf(fp2, "\n 학     번 이  름 국어 영어 수학 합계 평균 등급");
     fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====");
@@ -221,7 +216,142 @@ int SaveReport0() {
 
     fclose(fp2);    printf("\n(!) 출력파일을 닫았습니다.");
     fclose(fp1);    printf("\n(!) 입력파일을 닫았습니다.");
-    system("notepad c:/Temp/성적집계표-1.txt");
+    system("notepad c:/Temp/성적집계표-기본.txt");
+    return 0;
+}
+
+// 성적집계표-성적순 출력
+int SaveReport1() {
+    strcpy(fname1, "c:/Temp/성적데이터.txt");
+
+    if ((fp1 = fopen(fname1, "r")) == NULL) {
+        printf("(!) 입력파일 : \"%s\" 을 열 수 없습니다.\n", fname1);
+        return 0;
+    }
+    else {
+        printf("\n(!) 입력파일 : \"%s\" 을 열었습니다.\n", fname1);
+    }
+
+    strcpy(fname2, "c:/Temp/성적집계표-성적순.txt");
+
+    if ((fp2 = fopen(fname2, "w")) == NULL) {
+        printf("(!) 출력파일 : \"%s\" 을 만들 수 없습니다.\n", fname2);
+        return 0;
+    }
+    else {
+        printf("\n(!) 출력파일 : \"%s\" 을 만들었습니다.\n", fname2);
+    }
+
+    fprintf(fp2, "\n\t 성적집계표-성적순");
+    fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====");
+    fprintf(fp2, "\n 학     번 이  름 국어 영어 수학 합계 평균 등급");
+    fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====");
+
+    CNT = 0;
+    while (!feof(fp1)) {
+        fscanf(fp1, "%9s %9s %d %d %d", sid, name, &score1, &score2, &score3);
+        if (feof(fp1)) { break; }
+        total = score1 + score2 + score3;   average = total / 3;
+        fprintf(fp2, "\n %s %s %4d %4d %4d %5d %4d   %c",
+            sid, name, score1, score2, score3, total, average, Grade(average));
+        CNT++;
+    }
+    printf("\n\t(!) 총 %d 건의 데이터를 처리하였습니다. \n", CNT);
+    fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====\n ");
+
+    fclose(fp2);    printf("\n(!) 출력파일을 닫았습니다.");
+    fclose(fp1);    printf("\n(!) 입력파일을 닫았습니다.");
+    system("notepad c:/Temp/성적집계표-성적순.txt");
+    return 0;
+}
+
+// 성적집계표-이름순 출력
+int SaveReport2() {
+    strcpy(fname1, "c:/Temp/성적데이터.txt");
+
+    if ((fp1 = fopen(fname1, "r")) == NULL) {
+        printf("(!) 입력파일 : \"%s\" 을 열 수 없습니다.\n", fname1);
+        return 0;
+    }
+    else {
+        printf("\n(!) 입력파일 : \"%s\" 을 열었습니다.\n", fname1);
+    }
+
+    strcpy(fname2, "c:/Temp/성적집계표-이름순.txt");
+
+    if ((fp2 = fopen(fname2, "w")) == NULL) {
+        printf("(!) 출력파일 : \"%s\" 을 만들 수 없습니다.\n", fname2);
+        return 0;
+    }
+    else {
+        printf("\n(!) 출력파일 : \"%s\" 을 만들었습니다.\n", fname2);
+    }
+
+    fprintf(fp2, "\n\t 성적집계표-이름순");
+    fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====");
+    fprintf(fp2, "\n 학     번 이  름 국어 영어 수학 합계 평균 등급");
+    fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====");
+
+    CNT = 0;
+    while (!feof(fp1)) {
+        fscanf(fp1, "%9s %9s %d %d %d", sid, name, &score1, &score2, &score3);
+        if (feof(fp1)) { break; }
+        total = score1 + score2 + score3;   average = total / 3;
+        fprintf(fp2, "\n %s %s %4d %4d %4d %5d %4d   %c",
+            sid, name, score1, score2, score3, total, average, Grade(average));
+        CNT++;
+    }
+    printf("\n\t(!) 총 %d 건의 데이터를 처리하였습니다. \n", CNT);
+    fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====\n ");
+
+    fclose(fp2);    printf("\n(!) 출력파일을 닫았습니다.");
+    fclose(fp1);    printf("\n(!) 입력파일을 닫았습니다.");
+    system("notepad c:/Temp/성적집계표-이름순.txt");
+    return 0;
+}
+
+// 성적집계표-학번순 출력
+int SaveReport3() {
+    strcpy(fname1, "c:/Temp/성적데이터.txt");
+
+    if ((fp1 = fopen(fname1, "r")) == NULL) {
+        printf("(!) 입력파일 : \"%s\" 을 열 수 없습니다.\n", fname1);
+        return 0;
+    }
+    else {
+        printf("\n(!) 입력파일 : \"%s\" 을 열었습니다.\n", fname1);
+    }
+
+    strcpy(fname2, "c:/Temp/성적집계표-학번순.txt");
+
+    if ((fp2 = fopen(fname2, "w")) == NULL) {
+        printf("(!) 출력파일 : \"%s\" 을 만들 수 없습니다.\n", fname2);
+        return 0;
+    }
+    else {
+        printf("\n(!) 출력파일 : \"%s\" 을 만들었습니다.\n", fname2);
+    }
+
+    fprintf(fp2, "\n\t 성적집계표-학번순");
+    fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====");
+    fprintf(fp2, "\n 학     번 이  름 국어 영어 수학 합계 평균 등급");
+    fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====");
+
+    CNT = 0;
+    while (!feof(fp1)) {
+        fscanf(fp1, "%9s %9s %d %d %d", sid, name, &score1, &score2, &score3);
+        if (feof(fp1)) { break; }
+        total = score1 + score2 + score3;   average = total / 3;
+        fprintf(fp2, "\n %s %s %4d %4d %4d %5d %4d   %c",
+            sid, name, score1, score2, score3, total, average, Grade(average));
+        CNT++;
+    }
+    printf("\n\t(!) 총 %d 건의 데이터를 처리하였습니다. \n", CNT);
+    fprintf(fp2, "\n ========= ====== ==== ==== ==== ==== ==== ====\n ");
+
+    fclose(fp2);    printf("\n(!) 출력파일을 닫았습니다.");
+    fclose(fp1);    printf("\n(!) 입력파일을 닫았습니다.");
+    system("notepad c:/Temp/성적집계표-학번순.txt");
     return 0;
 }
 
